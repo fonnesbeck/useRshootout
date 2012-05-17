@@ -1,13 +1,7 @@
-========
-Octogit
-========
+=======================
+useR! Language Shootout
+=======================
 
 
-This repository has been created with Octogit.
 
-
-.. image:: http://myusuf3.github.com/octogit/assets/img/readme_image.png
-
-Author
-======
-Mahdi Yusuf (@myusuf3)
+Code and supporting materials for the useR special session on comparing statistical computing languages.
