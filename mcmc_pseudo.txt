@@ -1,0 +1,40 @@
+N = number of iterations
+k = number of parameters in model
+s = vector of proposal stdevs (len=k)
+accepted = 0
+
+initialize all k parameters arbitrarily
+
+loop over iterations i in 1 to N:
+
+    loop over parameters j in 1 to k:
+
+        get value x_j of parameter j
+        get stdev s_j from s
+
+        # propose new value 
+        y_j ~ N(x_j, s_j)
+
+        # calculate acceptance probability 
+        alpha = min(1, f(y_j)/f(x_j))
+
+        draw u ~ U(0,1)
+
+        if u < alpha:
+            set x_j = y_j
+            accepted += 1
+        else:
+            keep current x_j
+
+        store x_j to trace
+
+        # Adapt proposal variance every 1000 iterations
+        if not i % 1000:
+            
+            if the proportion accepted is <20%:
+                s_j *= 0.9
+            if the proportion accepted is >50%:
+                s_j *= 1.1
+
+            # Re-initialize acceptance counter
+            accepted = 0
