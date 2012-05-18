@@ -32,10 +32,10 @@ RCgibbs <- cmpfun(Rgibbs)
 In the `examples` directory of the [Rcpp](http://cran.r-project.org/package=Rcpp) package, Dirk provides an `R` script using the [inline](http://cran.r-project.org/package=inline), `Rcpp` and [RcppGSL](http:/cran.r-project.org) packages to implement this sampler in `C++` code callable from `R` and time the results.  On my desktop computer, timing 10 replications of `Rgibbs(20000, 200)` and the other versions produces
 ```text
                test replications elapsed  relative user.self sys.self
-4  GSLGibbs(N, thn)           10   8.338  1.000000     8.336    0.000
-3 RcppGibbs(N, thn)           10  13.285  1.593308    13.285    0.000
-2   RCgibbs(N, thn)           10 369.843 44.356320   369.327    0.032
-1    Rgibbs(N, thn)           10 473.511 56.789518   472.754    0.044
+4  GSLGibbs(N, thn)           10   8.228  1.000000     8.224     0.00
+3 RcppGibbs(N, thn)           10  13.531  1.644507    13.525     0.00
+2   RCgibbs(N, thn)           10 360.652 43.832280   360.198     0.02
+1    Rgibbs(N, thn)           10 456.440 55.473991   455.777     0.12
 ```
 
 A naive translation of Rgibbs to [Julia](http://julialang.org) can use the same samplers for the gamma and normal distributions as does R.  The `C` code for R's d-p-q-r functions for probability densities, cumulative distribution, quantile and random sampling can be compiled into a separate Rmath library.  These sources are included with the Julia sources and Julia functions with similar calling sequences are available as "extras/Rmath.jl"
