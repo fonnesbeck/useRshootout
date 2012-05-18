@@ -26,4 +26,24 @@ Rgibbs <- function(N,thin) {
 }
 
 ## We can also try the R compiler on this R function
+require(compiler)
 RCgibbs <- cmpfun(Rgibbs)
+
+
+require(rbenchmark)
+## also use rbenchmark package
+##
+## these values are low as we're still testing, and R is slow on this
+N <- 1000
+thn <- 100
+res <- benchmark(Rgibbs(N, thn),
+                 RCgibbs(N, thn),
+                 #RcppGibbs(N, thn),
+                 #GSLGibbs(N, thn),
+                 columns=c("test", "replications", "elapsed",
+                           "relative", "user.self", "sys.self"),
+                 order="relative",
+                 replications=10)
+print(res)
+
+
