@@ -1,0 +1,276 @@
+\documentclass[dvipsnames,pdflatex,beamer]{beamer}
+% \documentclass[letterpaper,11pt,notitlepage]{article}\usepackage{beamerarticle}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{url}
+\newcommand\code{\bgroup\@codex}
+\def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
+\mode<article>{\usepackage[text={6.2in,9in},centering]{geometry}}
+\mode<beamer>{\usetheme{Boadilla}\usecolortheme{seahorse}\usecolortheme{rose}}
+\title[Julia]{Julia for R programmers}
+\mode<beamer>{\setkeys{Gin}{width=\textwidth}}
+\mode<article>{\setkeys{Gin}{width=0.8\textwidth}}
+\author[Douglas Bates] {Douglas~Bates}
+\institute[U. Wisc.]{University of Wisconsin - Madison\\
+  {\texttt{<Bates@Wisc.edu>}}}
+\date[2012-06-14]{useR!2012\\June 14, 2012}
+\begin{document}
+
+\mode<article>{\maketitle\tableofcontents}
+\mode<presentation>{\frame{\titlepage}}
+\mode<presentation>{\frame{\frametitle{Outline}\tableofcontents[pausesections,hideallsubsections]}}
+\section[What is Julia?]{What is Julia?}
+\begin{frame}
+  \frametitle{The Julia language}
+  According to its developers (I have itemized what was a paragraph)
+  \begin{quote}
+    \begin{itemize}
+    \item Julia is a high-level, high-performance dynamic programming
+      language for technical computing, with syntax that is familiar to
+      users of other technical computing environments.
+    \item It provides a sophisticated compiler, distributed parallel
+      execution, numerical accuracy, and an extensive mathematical
+      function library.
+    \item The library, mostly written in Julia itself, also integrates
+      mature, best-of-breed C and Fortran libraries for linear algebra,
+      random number generation, FFTs, and string processing.
+    \item Julia programs are organized around defining functions, and
+      overloading them for different combinations of argument types,
+      which can also be user-defined.
+    \end{itemize}
+  \end{quote}
+\end{frame}
+\begin{frame}
+  \frametitle{Similarities to R}
+  \begin{itemize}
+  \item ``\textbf{high-level} $\dots$ \textbf{dynamic} programming language
+    for \textbf{technical computing}''.
+    \begin{description}
+    \item[high-level] can work on the level of vectors, matrices, structures, etc.
+    \item[dynamic] values have types, identifiers don't.  Functions
+      can be defined during an interactive session.
+    \item[technical computing] these folks know about floating point arithmetic
+    \end{description}
+  \item ``organized around defining \textbf{functions}, and
+    overloading them for different combinations of argument types''.
+    The ``overloading $\dots$'' part means generic functions and methods.
+  \item ``syntax that is familiar to uses of other technical computing
+    environments''. Julia code looks very much like R code and/or
+    Matlab/octave code.  It is, of course, not identical but
+    sufficiently similar to be readable.
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Major differences - advantage Julia}
+  \begin{itemize}
+  \item The ways in which R and Julia are different are too many to
+    enumerate.  These just skim the surface.
+  \item ``high-performance'', ``sophisticated compiler'',
+    ``distributed parallel execution''.  We will see all of these in
+    examples.  The compiler, based on LLVM, creates dynamically-loaded
+    machine code from method instantiations - type inference is used
+    to create very fast code.
+  \item ``types, which can be user-defined''.  Julia has a
+    sophisticated type system, simultaneously more specific and more
+    general than classes in R. Scalar types exist (convenient for
+    interfacing to C or Fortran compiled libraries).
+  \item All method dispatch is S4-like multiple dispatch.  All
+    functions are generic.
+  \item Distribution of base system and of packages is based on \emph{git}.
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Major differences - advantage R}
+  \begin{itemize}
+  \item Named actual arguments
+  \item Default argument values
+  \item Handling of NA's is built-in to R at a very low level
+  \item R is a mature language with large and active developer and
+    user communities and an extensive infrastructure (CRAN, Bioconductor,
+    mailing lists, The R Journal, JSS, hundreds of books describing R
+    and its applications, $\dots$)
+  \end{itemize}
+\end{frame}
+
+\section{The Simple Gibbs example}
+\label{sec:simplegibbs}
+
+\begin{frame}
+  \frametitle{The Simple Gibbs example}
+  \begin{itemize}
+  \item To get a flavor of the language, consider an example that has
+    been used in many language comparisons (admittedly an example not
+    well suited to R).
+  \item Generate a sample from the (unscaled) bivariate density
+    \begin{displaymath}
+      f(x,y) \propto x^2 \exp(-xy^2 - y^2 + 2y - 4x)
+    \end{displaymath}
+    using direct Gibbs sampling from the conditional distributions
+    \begin{displaymath}
+      \begin{aligned}
+      \mathcal{X}|\mathcal{Y} &\sim \Gamma(3, y^2 +4)\\
+      \mathcal{Y}|\mathcal{X} &\sim \mathcal{N}\left(\frac{1}{1+x},\frac{1}{2(1+x)}\right)
+      \end{aligned}
+    \end{displaymath}
+    with the $\Gamma$ distribution in the shape/rate formulation
+  \item Create a function of two arguments, $N$ and $\mathit{thin}$,
+    that returns a matrix of size $N\times 2$ containing $N$ samples
+    after thinning by  $\mathit{thin}$.
+  \end{itemize}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{The R function, Rgibbs}
+\begin{lstlisting}[language=R]
+Rgibbs <- function(N,thin) {
+    mat <- matrix(0,ncol=2,nrow=N)
+    x <- 0
+    y <- 0
+    for (i in 1:N) {
+        for (j in 1:thin) {
+            x <- rgamma(1,3,rate=y*y+4)
+            y <- rnorm(1,1/(x+1),1/sqrt(2*(x+1)))
+        }
+        mat[i,] <- c(x,y)
+    }
+    mat
+}
+\end{lstlisting}
+  As stated earlier, this function will not perform well because of
+  the inherently sequential nature of the calculation.  Even the
+  byte-compiled version is relatively slow.
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{JGibbs1, using Rmath.jl}
+\begin{lstlisting}[language=Matlab]
+load("extras/Rmath.jl")
+function JGibbs1(N::Int, thin::Int)
+    mat = Array(Float64, (N, 2))
+    x   = 0.
+    y   = 0.
+    for i = 1:N
+        for j = 1:thin
+            x = rgamma(1,3,1/(y*y + 4))[1]
+            y = rnorm(1, 1/(x+1),1/sqrt(2(x + 1)))[1]
+        end
+        mat[i,:] = [x,y]
+    end
+    mat
+end
+\end{lstlisting}
+The arguments to \code{rgamma} here are shape and scale (not rate).
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{JGibbs2, direct calls to libRmath}
+\begin{lstlisting}[language=Matlab]
+function JGibbs2(N::Int, thin::Int)
+    mat = Array(Float64, (N, 2))
+    x   = 0.
+    y   = 0.
+    for i = 1:N
+        for j = 1:thin
+            x = ccall(dlsym(_jl_libRmath, :rgamma),
+                      Float64, (Float64, Float64),
+                      3., 1/(y*y + 4))
+            y = ccall(dlsym(_jl_libRmath, :rnorm),
+                      Float64, (Float64, Float64), 
+                      1/(x+1), 1/sqrt(2(x + 1)))
+        end
+        mat[i,:] = [x,y]
+    end
+    mat
+end
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{JGibbs3, the Julia randn and randg samplers}
+\begin{lstlisting}[language=Matlab]
+function JGibbs3(N::Int, thin::Int)
+    mat = Array(Float64, (N, 2))
+    x   = 0.
+    y   = 0.
+    for i = 1:N
+        for j = 1:thin
+            x = randg(3) / (y*y + 4)
+            y = 1/(x + 1) + randn()/sqrt(2(x + 1))
+        end
+        mat[i,:] = [x,y]
+    end
+    mat
+end
+\end{lstlisting}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Distributed versions, dJGibbs3a and dJGibbs3b}
+  \begin{itemize}
+  \item Julia allows for distributed parallel execution by specifying
+    the number of processes at start-up.
+  \item One appealing abstraction for parallel execution is a
+    ``distributed array'' where each process works on a part of an
+    array.
+  \item The \code{dJGibbs3a} function leaves the result as a
+    distributed array, suitable for further distributed
+    processing. \code{dJGibbs3b} returns the result as an ordinary
+    array.  The results are from multiple chains not a single long
+    chain as in the other functions.
+  \end{itemize}
+\begin{lstlisting}[language=Matlab]
+function dJGibbs3a(N::Int, thin::Int)
+   darray((T,d,da)->JGibbs3(d[1],thin), 
+          Float64, (N, 2), 1)
+end
+function dJGibbs3b(N::Int, thin::Int)
+   convert(Array{Float64,2}, dJGibbs3a(N, thin))
+end
+\end{lstlisting}
+\end{frame}
+\begin{frame}
+  \frametitle{Timings}
+  \begin{itemize}
+  \item Detailed timings (and the code if you want to try yourself)
+    are at \url{https://gist.github.com/2656226}.
+  \item Roughly the results are:
+    \begin{itemize}
+    \item \code{JGibbs1} is within a factor of 2 of \code{RcppGibbs}.
+    \item \code{JGibbs2} is nearly the same speed as \code{RcppGibbs}.
+    \item \code{JGibbs3} is faster than \code{RcppGibbs} (which uses
+      the R samplers) and \code{GSLGibbs} (using the GSL samplers).
+      Differences are attributable to different samplers.
+    \item On a 4-core processor using 4 processes (and no conflicting
+      jobs), \code{dJGibbs3a} is nearly 4x faster than
+      \code{JGibbs3}.  \code{dJGibbs3b} is about 3x faster than
+      \code{JGibbs3}, due to the communication overhead of converting
+      from distributed to non-distributed.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recall the comment about ``library written in Julia itself''}
+\begin{lstlisting}[language=Matlab,basicstyle=\small]
+# Generating gamma variables - Marsaglia and Tsang
+function randg(a::Real)
+    d = a - 1.0/3.0
+    c = 1.0 / sqrt(9*d)
+    while(true)
+        v = 0.
+        while (v <= 0.0)
+            x = randn()
+            v = 1.0 + c*x
+        end
+        v = v*v*v
+        U = rand()
+        x2 = x*x
+        if U < 1.0 - 0.331*x2*x2; return d*v; end
+        if log(U) < 0.5*x2 + d*(1.0 - v + log(v))
+            return d*v
+        end
+    end
+end
+\end{lstlisting}
+\end{frame}
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
