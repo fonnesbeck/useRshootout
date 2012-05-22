@@ -32,7 +32,7 @@ function JGibbs1(N::Int, thin::Int)
     y   = 0.
     for i = 1:N
         for j = 1:thin
-            x = rgamma(1,3,(y*y + 4))[1]
+            x = rgamma(1,3,1/(y*y + 4))[1]
             y = rnorm(1, 1/(x+1),1/sqrt(2(x + 1)))[1]
         end
         mat[i,:] = [x,y]
@@ -48,7 +48,7 @@ function JGibbs2(N::Int, thin::Int)
     for i = 1:N
         for j = 1:thin
             x = ccall(dlsym(_jl_libRmath, :rgamma),
-                      Float64, (Float64, Float64), 3., (y*y + 4))
+                      Float64, (Float64, Float64), 3., 1/(y*y + 4))
             y = ccall(dlsym(_jl_libRmath, :rnorm),
                       Float64, (Float64, Float64), 1/(x+1), 1/sqrt(2(x + 1)))
         end
@@ -64,7 +64,7 @@ function JGibbs3(N::Int, thin::Int)
     y   = 0.
     for i = 1:N
         for j = 1:thin
-            x = randg(3) * (y*y + 4)
+            x = randg(3) / (y*y + 4)
             y = 1/(x + 1) + randn()/sqrt(2(x + 1))
         end
         mat[i,:] = [x,y]
