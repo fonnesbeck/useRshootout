@@ -2,7 +2,8 @@
 stopifnot(require(compiler),            # to byte-compile R code
           require(rbenchmark),          # to time our attempts
           require(inline),              # to compile/link/load C++ on the fly
-          require(RcppGSL))             # for the GSL example
+          require(RcppGSL),             # for the GSL example
+          require(RcppArmadillo))       # for the Armadillo example
 
 ## Gibbs sampler for function:
 
@@ -176,44 +177,88 @@ Cxx12Gibbs <- cxxfunction(signature(ns="int", thns = "int"),
                           body=cxx12code, includes=cxx12incl,
                           settings=rcppPlugin)
 
-cxxMPincl <- '
-#include <random>
-#include <omp.h>
-'
+## It is not so clear that OpenMP makes sense here as the problem is rather 'sequential'
+##
+##
+## cxxMPincl <- '
+## #include <random>
+## #include <omp.h>
+## '
 
-cxxMPcode <- '
-  int N = as<int>(ns);
-  int thin = as<int>(thns);
-  int i, j;
-  double x=0, y=0;
-  //NumericMatrix mat(N, 2);
-  std::vector<double> X(N), Y(N);
+## cxxMPcode <- '
+##   int N = as<int>(ns);
+##   int thin = as<int>(thns);
+##   int i, j;
+##   double x=0, y=0;
+##   //NumericMatrix mat(N, 2);
+##   std::vector<double> X(N), Y(N);
 
-  std::mt19937 engine(42);
-  std::gamma_distribution<> gamma(3.0, 1.0);
-  std::normal_distribution<> normal(0.0, 1.0);
+##   std::mt19937 engine(42);
+##   std::gamma_distribution<> gamma(3.0, 1.0);
+##   std::normal_distribution<> normal(0.0, 1.0);
 
-  omp_set_num_threads(8);
-#pragma omp parallel for private(j)
+##   omp_set_num_threads(8);
+## #pragma omp parallel for private(j)
 
-  for (i=0; i<N; i++) {
-    for (j=0; j<thin; j++) {
-      x = gamma(engine)/(1.0/(y*y+4));     // beta normalized to 1.0; dividing by beta gives us Gamma(alpha, beta)
-      y = 1.0/(x+1) + normal(engine)*(1.0/sqrt(2*x+2));  // scale by sigma and move by mu
-    }
-    X[i] = x;
-    Y[i] = y;
-  }
-  return Rcpp::List::create(Rcpp::Named("x")=X,
-                            Rcpp::Named("y")=Y);
-'
+##   for (i=0; i<N; i++) {
+##     for (j=0; j<thin; j++) {
+##       x = gamma(engine)/(1.0/(y*y+4));     // beta normalized to 1.0; dividing by beta gives us Gamma(alpha, beta)
+##       y = 1.0/(x+1) + normal(engine)*(1.0/sqrt(2*x+2));  // scale by sigma and move by mu
+##     }
+##     X[i] = x;
+##     Y[i] = y;
+##   }
+##   return Rcpp::List::create(Rcpp::Named("x")=X,
+##                             Rcpp::Named("y")=Y);
+## '
 
-rcppPlugin <- getPlugin("Rcpp")
-rcppPlugin$env$PKG_CXXFLAGS <- "-std=c++0x -fopenmp"
-rcppPlugin$env$PKG_LIBS <- paste("-fopenmp", rcppPlugin$env$PKG_LIBS)
-CxxMPGibbs <- cxxfunction(signature(ns="int", thns = "int"),
-                          body=cxxMPcode, includes=cxxMPincl,
-                          settings=rcppPlugin)
+## rcppPlugin <- getPlugin("Rcpp")
+## rcppPlugin$env$PKG_CXXFLAGS <- "-std=c++0x -fopenmp"
+## rcppPlugin$env$PKG_LIBS <- paste("-fopenmp", rcppPlugin$env$PKG_LIBS)
+## CxxMPGibbs <- cxxfunction(signature(ns="int", thns = "int"),
+##                           body=cxxMPcode, includes=cxxMPincl,
+##                           settings=rcppPlugin)
+
+## Too many vector/scalar conversions to be competitive
+##
+##
+## armaincl <- '
+## inline double rgamma(const double alpha, const double beta) {
+##   double r = arma::as_scalar(arma::randu<arma::mat>(1));
+##   double rg = Rf_qgamma(r, alpha, beta, 1, 0);
+##   return rg;
+## }
+
+## inline double rnormal(const double mu, const double sigma) {
+##   double r = arma::as_scalar(arma::randn<arma::mat>(1));
+##   double rn = r*sigma + mu;
+##   return rn;
+## }'
+
+## armacode <- '
+##   int N = as<int>(ns);
+##   int thin = as<int>(thns);
+##   int i, j;
+##   double x=0, y=0;
+##   NumericMatrix mat(N, 2);
+
+##   std::srand(42);
+
+##   for (i=0; i<N; i++) {
+##     for (j=0; j<thin; j++) {
+##       x = rgamma(1.0, 1.0/(y*y+4));
+##       y = rnormal(1.0/(x+1), 1.0/sqrt(2*x+2));
+##     }
+##     mat(i,0) = x;
+##     mat(i,1) = y;
+##   }
+##   return mat;           // Return to R
+## '
+
+## armaGibbs <- cxxfunction(signature(ns="int", thns = "int"),
+##                          body=armacode, includes=armaincl,
+##                          plugin="RcppArmadillo")
+
 
 
 ## also use rbenchmark package
@@ -227,7 +272,8 @@ res <- benchmark(Rgibbs(N, thn),
                  GSLGibbs(N, thn),
                  BoostGibbs(N, thn),
                  Cxx12Gibbs(N, thn),
-                 CxxMPGibbs(N, thn),
+                 #CxxMPGibbs(N, thn),
+                 #armaGibbs(N, thn),
                  columns=c("test", "replications", "elapsed",
                            "relative", "user.self", "sys.self"),
                  order="relative",
@@ -242,7 +288,8 @@ res <- benchmark(RcppGibbs(N, thn),
                  GSLGibbs(N, thn),
                  BoostGibbs(N, thn),
                  Cxx12Gibbs(N, thn),
-                 CxxMPGibbs(N, thn),
+                 #CxxMPGibbs(N, thn),
+                 #armaGibbs(N, thn),
                  #columns=c("test", "replications", "elapsed",
                  #          "relative", "user.self", "sys.self"),
                  order="relative",
