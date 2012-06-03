@@ -1,0 +1,138 @@
+\documentclass[handout,compress,dvipsnames,pdflatex,beamer]{beamer}
+%\documentclass[letterpaper,11pt,notitlepage]{article}\usepackage{beamerarticle}
+%\usepackage{amsmath}
+
+\usepackage{listings}
+\usepackage{url}
+
+\usepackage{color}
+\definecolor{myDarkBlue}{rgb}{0.1,0.1,0.4}
+\definecolor{myDarkGrey}{rgb}{0.15,0.15,0.15}
+\definecolor{myOrange}{rgb}{0.8,0.5,0.0}
+\hypersetup{                  		% beamer colors taken from elsewhere
+  hyperindex,%				% works with the beetle colour scheme
+  colorlinks,%
+  linktocpage,%
+  plainpages=true,%
+  linkcolor=myOrange,%
+  citecolor=myDarkGrey,%
+  urlcolor=myDarkBlue,%
+  pdfstartview=Fit,%
+  pdfview={XYZ null null null}%
+}
+
+
+%\newcommand\code{\bgroup\@codex}
+%\def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
+%\mode<article>{\usepackage[text={6.2in,9in},centering]{geometry}}
+%\mode<beamer>{\usetheme{Boadilla}\usecolortheme{seahorse}\usecolortheme{rose}}
+%\mode<beamer>{\usetheme[secheader]{Boadilla}\usecolortheme{whale}}
+%\mode<beamer>{\usetheme[secheader]{Madrid}\usecolortheme{whale}}
+
+%\mode<beamer>{\setkeys{Gin}{width=\textwidth}}
+%\mode<article>{\setkeys{Gin}{width=0.8\textwidth}}
+
+\mode<presentation>{\usetheme{Warsaw}}
+
+
+\title{C++ for R programmers}
+
+\author[Dirk Eddelbuettel]{Dr.~Dirk Eddelbuettel\\ \scriptsize\url{edd@debian.org}\\ \url{dirk.eddelbuettel@R-Project.org}}
+
+\date[useR! 2012 @ Vanderbilt]{\textsl{useR!} 2012\\ Vanderbilt University \\ June 14, 2012}
+
+\begin{document}
+
+%\mode<article>{\maketitle\tableofcontents}
+
+\mode<presentation>{\frame{\titlepage}}
+
+%\mode<presentation>{\frame{\frametitle{Outline}\tableofcontents[pausesections,hideallsubsections]}}
+
+\section[C++?]{Why C++?}
+\subsection{Overview}
+\begin{frame}
+  \frametitle{So ``Why C++'' ?}
+  
+  \begin{itemize}
+  \item Asking Google leads to 51,600,000 hits.
+  \item I did not read all of them.
+  %\item Some lead to people at most one degree of
+  %  separation away from the audience like John D.~Cook.
+  \item \href{http://en.wikipedia.org/wiki/C\%2B\%2B}{Wikipedia} starts with
+    \emph{C++ (pronounced "cee plus plus") is a statically typed,
+      free-form, multi-paradigm, compiled, general-purpose, powerful
+      programming language.}  
+  \item We could spend this session discussing just that sentence.
+  \item C++ is industrial-strength, widely-used, vendor-independent and
+    \emph{still evolving}.
+  \item In science and research, it is one of the most widely-used
+    languages.  If there is something you want to use or connect to, it
+    probably has a C/C++ API.
+  \end{itemize}
+\end{frame}
+
+\subsection{Federation}
+\begin{frame}
+  \frametitle{Another popular view on ``What C++ is''}
+  \framesubtitle{From Scott Meyers highly-regarded``Effective C++''}
+
+  Item 1:   \emph{``View C++ as a federation of languages''}
+
+  \begin{enumerate}
+  \item \emph{C} provides a rich inheritance and interoperability as Unix, Windows,
+    ... are all build on C
+  \item \emph{Object-Oriented C++} just to provide endless discussions about the
+    right notion of what OO is or should be (and R really helps here having
+    three different ones to offer :-/ )
+  \item \emph{Templated C++} which is mighty powerful; template meta
+    programming unequalled in other languages
+  \item \emph{The STL} which is a specific template library which is powerful but
+    has its own conventions
+  \end{enumerate}
+  
+\end{frame}
+
+\section[With R]{Why C++ with R?}
+\subsection{Mixing}
+\begin{frame}
+  \frametitle{Barbells not bullets}
+  \begin{itemize}
+  \item On my first job, ``barbell'' (portfolios) meant those comprised of
+    both long and short duration bonds -- as opposed to ``bullet'' portfolio concentrated at one (middle) duration.
+  \item I feel language choice is similar:  It is rare to have one single
+    solution for all problems.
+  \item Python may be close.  Julia may well get there too.
+  \item But I am a realist, and I have \emph{never} been on a project or
+    team that was single-language, single-solution.
+  \item In practive, people will always mix.  John Chambers has made that
+    point eloquently too.
+  \item So face this head-on and pick tools \emph{which mix well}.  It so
+    happens that I think R and C++ mix well via Rcpp / RInside.
+  \end{itemize}
+\end{frame}
+
+\subsection{Interchange}
+\begin{frame}
+  \frametitle{Sending R objects back and forth}
+  \framesubtitle{Possible with R's API, easier with Rcpp}
+  \begin{itemize}
+  \item Essentially, any R object is represented internally as a SEXP.
+  \item The \texttt{.Call} interface lets you send SEXPs back and forth.
+  \item SEXP can be nested just like R objects: lists of lists of ...
+  \item Rcpp makes the interchange of R objects a little easier than the
+    plain C API for R. 
+  \item ``Empirically speaking'', 68 CRAN packages (as
+    of 3 June 2012) using Rcpp seem to agree.
+  \item This make Rcpp the most widely used foreign-language interface
+    package for R (as it overtook rJava recently). Of course, there is the
+    plain C API...
+  \end{itemize}
+\end{frame}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
