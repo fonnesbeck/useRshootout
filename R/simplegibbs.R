@@ -171,11 +171,11 @@ cxx12code <- '
   return mat;           // Return to R
 '
 
-rcppPlugin <- getPlugin("Rcpp")
-rcppPlugin$env$PKG_CXXFLAGS <- "-std=c++0x"
-Cxx12Gibbs <- cxxfunction(signature(ns="int", thns = "int"),
-                          body=cxx12code, includes=cxx12incl,
-                          settings=rcppPlugin)
+# rcppPlugin <- getPlugin("Rcpp")
+# # rcppPlugin$env$PKG_CXXFLAGS <- "-std=c++0x"
+# Cxx12Gibbs <- cxxfunction(signature(ns="int", thns = "int"),
+#                           body=cxx12code, includes=cxx12incl,
+#                           settings=rcppPlugin)
 
 ## It is not so clear that OpenMP makes sense here as the problem is rather 'sequential'
 ##
@@ -271,7 +271,7 @@ res <- benchmark(Rgibbs(N, thn),
                  RcppGibbs(N, thn),
                  GSLGibbs(N, thn),
                  BoostGibbs(N, thn),
-                 Cxx12Gibbs(N, thn),
+                 # Cxx12Gibbs(N, thn),
                  #CxxMPGibbs(N, thn),
                  #armaGibbs(N, thn),
                  columns=c("test", "replications", "elapsed",
@@ -287,7 +287,7 @@ thn <- 200
 res <- benchmark(RcppGibbs(N, thn),
                  GSLGibbs(N, thn),
                  BoostGibbs(N, thn),
-                 Cxx12Gibbs(N, thn),
+                 # Cxx12Gibbs(N, thn),
                  #CxxMPGibbs(N, thn),
                  #armaGibbs(N, thn),
                  #columns=c("test", "replications", "elapsed",

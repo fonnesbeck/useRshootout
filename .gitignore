@@ -1,0 +1,4 @@
+python/*.c
+python/*.so
+build
+*.history
