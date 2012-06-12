@@ -2,3 +2,5 @@ python/*.c
 python/*.so
 build
 *.history
+*.pyc
+*.zip
