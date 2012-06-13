@@ -1,4 +1,5 @@
-\documentclass[handout,compress,dvipsnames,pdflatex,beamer]{beamer}
+%\documentclass[handout,compress,dvipsnames,pdflatex,beamer]{beamer}
+\documentclass[dvipsnames,compress,pdflatex,beamer]{beamer}
 %\documentclass[letterpaper,11pt,notitlepage]{article}\usepackage{beamerarticle}
 %\usepackage{amsmath}
 
@@ -43,7 +44,7 @@
 \date[useR! 2012 @ Vanderbilt]{
   { \small 
     Invited Session: 
-    \textsl{What other languages should R users know about?}}\\[20pt] 
+    \textsl{What other languages should R users know about ?}}\\[20pt] 
   \textsl{useR!} 2012\\ Vanderbilt University \\
   June 14, 2012  }
 
@@ -56,13 +57,25 @@
 %\mode<presentation>{\frame{\frametitle{Outline}\tableofcontents[pausesections,hideallsubsections]}}
 
 \section[C++?]{Why C++?}
+
 \subsection{Overview}
+
+\begin{frame}
+
+  \begin{figure}
+    \includegraphics[scale=0.55]{images/there-be-dragons-map.jpg}
+  \end{figure}
+
+\end{frame}
+
 \begin{frame}
   \frametitle{So ``Why C++'' ?}
-  
-  \begin{itemize}
-  \item Asking Google leads to 51,600,000 hits.
-  \item I did not read all of them.
+
+  \pause
+  \begin{itemize}[<+->]
+  \item Asking Google leads to 51,600,000 hits. 
+  \item No, I didn't read all of those.
+  %\item I did not read all of them.
   %\item Some lead to people at most one degree of
   %  separation away from the audience like John D.~Cook.
   \item \href{http://en.wikipedia.org/wiki/C\%2B\%2B}{Wikipedia} starts with
@@ -75,54 +88,73 @@
   \item In science and research, it is one of the most widely-used
     languages.  If there is something you want to use or connect to, it
     probably has a C/C++ API.
+  \item As a widely used language it also has good tool support (debuggers,
+    [memory] profilers, code analysis).
   \end{itemize}
 \end{frame}
 
 \subsection{Federation}
 \begin{frame}
-  \frametitle{Another popular view on ``What C++ is''}
+  \frametitle{A popular view on ``What C++ is''}
   \framesubtitle{From Scott Meyers highly-regarded``Effective C++''}
+
+  \pause
 
   Item 1:   \emph{``View C++ as a federation of languages''}
 
-  \begin{enumerate}
+  \pause
+
+  \begin{enumerate}[<+->]
   \item \emph{C} provides a rich inheritance and interoperability as Unix, Windows,
-    ... are all build on C
-  \item \emph{Object-Oriented C++} just to provide endless discussions about the
-    right notion of what OO is or should be (and R really helps here having
-    three different ones to offer :-/ )
+    ... are all build on C.
+  \item \emph{Object-Oriented C++} just to provide endless discussions about
+    exactly what OO is or should be (and R really helps here having
+    three different ones to offer :-/ ).
   \item \emph{Templated C++} which is mighty powerful; template meta
-    programming unequalled in other languages
+    programming unequalled in other languages.
   \item \emph{The STL} which is a specific template library which is powerful but
-    has its own conventions
+    has its own conventions.
   \end{enumerate}
   
+  \pause And C++11 adds many more goodies that could be called a fifth language.
 \end{frame}
 
 \section[With R]{Why C++ with R?}
 \subsection{Mixing}
 \begin{frame}
-  \frametitle{Barbells not bullets}
-  \begin{itemize}
-  \item On my first job, ``barbell'' (portfolios) meant those comprised of
-    both long and short duration bonds -- as opposed to ``bullet'' portfolio concentrated at one (middle) duration.
+  \frametitle{\textsl{Barbells not bullets}}
+  \begin{itemize}[<+->]
+  \item ``Barbell'' portfolios mean those comprised of both long and short
+    duration bonds -- as opposed to ``bullet'' portfolio concentrated at one
+    (middle) duration. 
   \item I feel language choice is similar:  It is rare to have one single
-    solution for all problems.
-  \item Python may be close.  Julia may well get there too.
+    solution for all problems. Python may be close;  Julia may get there too.
   \item But I am a realist, and I have \emph{never} been on a project or
     team that was single-language, single-solution.
-  \item In practive, people will always mix.  John Chambers has made that
-    point eloquently too.
-  \item So face this head-on and pick tools \emph{which mix well}.  It so
-    happens that I think R and C++ mix well via Rcpp / RInside.
+  \item In practice, people will always mix.  %John Chambers has made that point eloquently too.
+  %\item 
+    So let's face this head-on and pick tools \emph{which mix well}.  
+  \item It so happens that I think R and C++ mix well via Rcpp and RInside.
   \end{itemize}
+\end{frame}
+
+\subsection{Interface}
+\begin{frame}
+  \frametitle{John Chambers agrees}
+  %\framesubtitle{A ``interface'' vision from 1976}
+
+  \begin{figure}
+    \includegraphics[scale=0.3,angle=270]{images/Chambers2010_Page6.pdf}
+  \end{figure}
+
+  \medskip \footnotesize Source: John Chambers' talk at Google, 2010.
 \end{frame}
 
 \subsection{Interchange}
 \begin{frame}
   \frametitle{Sending R objects back and forth}
   \framesubtitle{Possible with R's API, easier with Rcpp}
-  \begin{itemize}
+  \begin{itemize}[<+->]
   \item Essentially, any R object is represented internally as a SEXP.
   \item The \texttt{.Call} interface lets you send SEXPs back and forth.
   \item SEXP can be nested just like R objects: lists of lists of ...
@@ -135,6 +167,73 @@
     plain C API...
   \end{itemize}
 \end{frame}
+
+\section{Competition}
+
+\subsection{Python}
+\begin{frame}
+  \frametitle{Python}
+  \pause
+
+  \begin{figure}
+    \includegraphics[scale=0.8]{images/Mowglikaa2.jpg}
+  \end{figure}
+
+  \medskip
+
+  \emph{Trust me, Mogli....}   Seriously?
+\end{frame}
+
+
+\subsection{Julia}
+\begin{frame}
+  \frametitle{Julia}
+  \pause
+
+  \begin{figure}
+    \includegraphics[scale=0.3]{images/JEasGoalie.jpeg}
+  \end{figure}
+
+  \medskip
+
+  This is my Julia and until I find a matching language ``Anna'' ...
+
+\end{frame}
+
+% Sutter: (Not your Father's) C++
+% http://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2012/-Not-Your-Father-s-C-
+
+% What makes ISO C++11 "feel like a new language"? What things that we know
+% about past C++ do we need to unlearn? Why is C++ designed the way it is –
+% historically, and in C++11? Finally, what is the difference between managed
+% and native languages anyway, and when is each applicable? This talk gives an
+% overview and motivation of modern C++ and why it's clean, safe, and fast – as
+% clean to code in and as type-safe as any modern language, and more than ever
+% the king of "fast."
+
+
+% Chandler Carruth
+% http://channel9.msdn.com/Events/GoingNative/GoingNative-2012/Clang-Defending-C-from-Murphy-s-Million-Monkeys
+
+% Were we to craft a Lenox Globe of programming languages, C++ might be
+% followed by a famous cautionary phrase: Here Be Dragons. The language can be
+% complex and daunting to programmers who are often shouldered with the task of
+% writing large, complex programs. Those millions of code monkeys need help to
+% resist Murphy's siren song and navigate C++'s treacherous waters of memory
+% corruption and concurrency bugs.
+ 
+% Clang is a C++ compiler platform that tries to address these challenges
+% (among others) across the spectrum of development activities. It provides
+% fantastic diagnostics, static and dynamic program analysis, advanced
+% rewriting and refactoring functionality, and language extensibility. Together
+% with improvements to the language in C++11 these help programmers cope with
+% today's code and write better code tomorrow. Clang also makes it easier than
+% ever before to evolve and evaluate new language features and extensions to
+% make C++ itself better.
+ 
+% Through this talk I'll give some background on the Clang compiler, what it
+% does today to make writing C++ better, and how we're using it to help shape
+% the C++ language going forward.
 
 \end{document}
 
