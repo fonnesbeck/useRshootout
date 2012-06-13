@@ -140,7 +140,7 @@
 
 \subsection{Interface}
 \begin{frame}
-  \frametitle{John Chambers agrees}
+  \frametitle{John Chambers agrees -- and shares a ``vision'' from 1976}
   %\framesubtitle{A ``interface'' vision from 1976}
 
   \begin{figure}
@@ -163,8 +163,8 @@
   \item ``Empirically speaking'', 68 CRAN packages (as
     of 3 June 2012) using Rcpp seem to agree.
   \item This makes Rcpp the most widely used foreign-language interface
-    package for R (as it overtook rJava recently). Of course, there is the
-    plain C API...
+    package for R (as it overtook rJava recently). 
+    % Of course, there is the plain C API...
   \end{itemize}
 \end{frame}
 
@@ -173,14 +173,17 @@
 \subsection{Python}
 \begin{frame}
   \frametitle{Python}
+  %\frametitle{  \emph{Trust me, Mogli....}  --  Seriously?}
   \pause
 
   \begin{figure}
-    \includegraphics[scale=0.8]{images/Mowglikaa2.jpg}
+    %\includegraphics[scale=0.8]{images/Mowglikaa2.jpg}
+    \includegraphics[scale=0.6]{images/jungle-book-kaa.jpg}
   \end{figure}
 
-  \medskip
-
+  \smallskip
+  
+  \pause
   \emph{Trust me, Mogli....}   Seriously?
 \end{frame}
 
@@ -196,8 +199,43 @@
 
   \medskip
 
-  This is my Julia and until I find a matching language ``Anna'' ...
+  My Julia -- and until I find a matching language named after my other
+  daughter Anna ...
 
+\end{frame}
+
+\section{Shootout}
+\begin{frame}
+  \frametitle{Shootout and C++ / Rcpp based solutions}
+
+  \begin{enumerate}[<+->]
+  \item Gibbs Sampler example:  I don't actually have much to add here which
+    wasn't in the earlier blog posts.
+  \item Metropolis example:  Whit Armstrong covered that in his recent
+    rcppbugs package.
+  \item Chris will cover both in the Python part.
+  \end{enumerate}
+\end{frame}
+
+
+\section{Outlook}
+\begin{frame}
+  \frametitle{C++11: The future}
+  \framesubtitle{These are interesting times}
+
+  \begin{itemize}[<+->]
+  \item Arguably, new standard C++11 makes C++ a new language.
+  \item LLVM/Clang++ offers venues for static / dynamic code
+    analysis and emergence of new tools.
+  \item Lots of very promising changes --- while maintaining full
+    compatibility and still being \emph{fastest possible language} yet having
+    \emph{zero overhead} approach.
+  \item Thanks to JJ, two pointers to two very recent talks: 
+    \begin{itemize}
+    \item Herb Sutter on \href{http://channel9.msdn.com/Events/Lang-NEXT/Lang-NEXT-2012/-Not-Your-Father-s-C-}{(Not your father's) C++}
+    \item Chander Carruth on \href{http://channel9.msdn.com/Events/GoingNative/GoingNative-2012/Clang-Defending-C-from-Murphy-s-Million-Monkeys}{Clang Defending C++ from Murphy's Million Monkeys}
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 % Sutter: (Not your Father's) C++
